@@ -1,0 +1,10 @@
+/node_modules
+/client/node_modules
+.env
+/client/.env
+package-lock.json
+/client/package-lock.json
+/.vscode
+/cache
+/artifacts
+/ignition/deployments
