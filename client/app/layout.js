@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Web3Provider } from "@/context/Web3Context";
 import Navbar from "@/components/Navbar";
+import { ChakraUIProvider } from "@/context/ChakraProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,10 +15,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Web3Provider>
-          <Navbar/>
-          {children}
-        </Web3Provider>
+        <ChakraUIProvider>
+          <Web3Provider>
+            <Navbar/>
+            {children}
+          </Web3Provider>
+        </ChakraUIProvider>
       </body>
     </html>
   );

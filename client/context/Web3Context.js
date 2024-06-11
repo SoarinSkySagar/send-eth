@@ -47,13 +47,10 @@ export function Web3Provider({ children }) {
       const event = transaction.events.Sent;
 
       if (event) {
-        const { from, to, amount, uid } = event.returnValues;
-        console.log('Event received:', event);
-        console.log('From:', from);
-        console.log('To:', to);
-        console.log('Amount:', amount);
-        console.log('UID:', uid);
-        return { from, to, amount, uid };
+        const { _amount, _receiver, _sender, _uid } = event.returnValues;
+        const amount = Web3.utils.fromWei(_amount, 'ether')
+        const uid = Number(_uid)
+        return { amount, _receiver, _sender, uid };
       } else {
         console.log('No Sent event found in the transaction receipt');
         return null;
@@ -64,8 +61,11 @@ export function Web3Provider({ children }) {
   async function getTxDetails(uid) {
     if (contract) {
       const tx = await contract.methods.getTxDetails(uid).call();
-      console.log('Transaction details:', tx)
-      return tx;
+      const NumUid = Number(tx.uid)
+      const valueInEth = Web3.utils.fromWei(tx.value, 'ether')
+      const reciever = tx.reciever;
+      const sender = tx.sender;
+      return {reciever, sender, NumUid, valueInEth};
     }
   
   }
@@ -73,8 +73,20 @@ export function Web3Provider({ children }) {
   async function getAllTxDetails(address) {
     if (contract) {
       const txs = await contract.methods.getAllTxDetails(address).call();
-      console.log('All transactions:', txs)
-      return txs;
+      const res = txs.map(item => {
+        const sender = item.sender
+        const receiver = item.reciever
+        const value = Web3.utils.fromWei(item.value, 'ether')
+        const uid = Number(item.uid)
+
+        return {
+          sender,
+          receiver,
+          value,
+          uid
+        }
+      })
+      return res
     }
   
   }

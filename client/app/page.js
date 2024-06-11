@@ -9,18 +9,23 @@ export default function Home() {
 
   const sendEth = async () => {
     const tx = await send('0x9CA9c5303bf6eCF5CaafEfa9BF19EF03c0a90c1c', 0.01);
-    console.log('Transaction:', tx);
+    console.log("amount:", tx.amount)
+    console.log("receiver:", tx._receiver)
+    console.log("sender:", tx._sender)
+    console.log("uid:", tx.uid)
   }
 
   const getAllTx = async () => {
     const txs = await getAllTxDetails('0x9CA9c5303bf6eCF5CaafEfa9BF19EF03c0a90c1c');
-    console.log('All transactions:', txs);
-  
+    console.log(txs[4]);
   }
 
   const searchTx = async () => {
-    const tx = await getTxDetails(2985265n);
-    console.log('Transaction details:', tx)
+    const tx = await getTxDetails(9040504);
+    console.log('Receiver:', tx.reciever)
+    console.log('Sender:', tx.sender)
+    console.log('Value:', tx.valueInEth)
+    console.log('Uid:', tx.NumUid)
   
   }
 
