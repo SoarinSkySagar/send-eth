@@ -4,11 +4,22 @@ import { useWeb3 } from "@/context/Web3Context";
 import { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import { Button, ButtonGroup } from '@chakra-ui/react'
+import {
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
+} from '@chakra-ui/react'
 
 export default function Navbar() {
     const { connectedAccount, connectMetamask, getTxDetails, getAllTxDetails } = useWeb3();
+
     const [account, setAccount] = useState(null)
     const [input, setInput] = useState('')
+
 
     useEffect(() => {
         async function getAccount() {
@@ -32,10 +43,6 @@ export default function Navbar() {
         if (input) {
             const tx = await getTxDetails(input)
             setInput('')
-            console.log('Receiver:', tx.reciever)
-            console.log('Sender:', tx.sender)
-            console.log('Value:', tx.valueInEth)
-            console.log('Uid:', tx.NumUid)
         }
     }
 

@@ -2,24 +2,86 @@
 
 import { useWeb3 } from "@/context/Web3Context";
 import { useState, useEffect } from "react";
+import { useToast } from '@chakra-ui/react'
+import { FaLock } from "react-icons/fa";
 
 export default function Home() {
   const { connectedAccount, send} = useWeb3();
-  const [uid, setUid] = useState(0)
+  const toast = useToast()
 
-  const sendEth = async () => {
-    const tx = await send('0x9CA9c5303bf6eCF5CaafEfa9BF19EF03c0a90c1c', 0.01);
-    console.log("amount:", tx.amount)
-    console.log("receiver:", tx._receiver)
-    console.log("sender:", tx._sender)
-    console.log("uid:", tx.uid)
+  const [uid, setUid] = useState(0)
+  const [sendTo, setSendTo] = useState('')
+  const [amount, setAmount] = useState('')
+
+  const sendEth = async (address, value) => {
+    const tx = await send(address, value);
+    // console.log("amount:", tx.amount)
+    // console.log("receiver:", tx._receiver)
+    // console.log("sender:", tx._sender)
+    // console.log("uid:", tx.uid)
+    if (tx.uid != 0) {
+      toast({
+        title: 'Transaction Successful!',
+        description: "Your transaction UID is "+tx.uid,
+        status: 'success',
+        duration: 10000,
+        isClosable: true,
+      })
+    } else if (uid == 0) {
+      toast({
+        title: 'Transaction failed due to network errors!',
+        description: "Please try again",
+        status: 'error',
+        duration: 10000,
+        isClosable: true,
+      })
+    } else if (tx == null) {
+      toast({
+        title: 'Transaction failed due to client errors!',
+        description: "Please contact developers",
+        status: 'error',
+        duration: 10000,
+        isClosable: true,
+      })
+    }
+  }
+
+  const handleSubmit = async () => {
+    await sendEth(sendTo, amount)
+    setSendTo('')
+    setAmount('')
   }
 
   return (
-    <>
-      <button onClick={sendEth}>
-        Send
+    <div className="min-h-screen bg-orange-200 flex items-center justify-center">
+  <div className="bg-white bg-opacity-50 backdrop-filter backdrop-blur-lg rounded-lg px-5 py-8 shadow-lg w-full max-w-md">
+    {connectedAccount ? <div><h1 className="text-2xl font-bold mb-1">Transfer to:</h1>
+    <input
+      type="text"
+      placeholder="Enter address"
+      className="border border-gray-300 p-2 rounded mb-4 w-full"
+      value={sendTo}
+      onChange={(e) => setSendTo(e.target.value)}
+    />
+    <h1 className="text-2xl font-bold mb-1">Amount (in ETH):</h1>
+    <input
+      type="number"
+      placeholder="Enter amount"
+      className="border border-gray-300 p-2 rounded mb-4 w-full"
+      value={amount}
+      onChange={(e) => setAmount(e.target.value)}
+    />
+    <div className="flex justify-center">
+      <button className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700" onClick={handleSubmit}>
+        Submit
       </button>
-    </>
+    </div></div> :
+    <h1 className="flex items-center text-red-500 font-bold px-10">
+    <FaLock className="mr-2" /> 
+    Please connect Metamask wallet first!
+  </h1>}
+  </div>
+</div>
+
   )
 }

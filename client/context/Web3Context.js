@@ -9,6 +9,7 @@ const BlockchainContext = createContext();
 export const useWeb3 = () => useContext(BlockchainContext);
 
 export function Web3Provider({ children }) {
+
   const [web3, setWeb3] = useState(null);
   const [contract, setContract] = useState(null);
   const [connectedAccount, setConnectedAccount] = useState(null);
@@ -41,20 +42,24 @@ export function Web3Provider({ children }) {
   }
 
   async function send(receiver, valueInEth) {
-    if (contract && connectedAccount) {
-      const transaction = await contract.methods.send(receiver).send({ from: connectedAccount, value: Web3.utils.toWei(valueInEth, 'ether') });
-
-      const event = transaction.events.Sent;
-
-      if (event) {
-        const { _amount, _receiver, _sender, _uid } = event.returnValues;
-        const amount = Web3.utils.fromWei(_amount, 'ether')
-        const uid = Number(_uid)
-        return { amount, _receiver, _sender, uid };
-      } else {
-        console.log('No Sent event found in the transaction receipt');
-        return null;
+    try {
+      if (contract && connectedAccount) {
+        const transaction = await contract.methods.send(receiver).send({ from: connectedAccount, value: Web3.utils.toWei(valueInEth, 'ether') });
+  
+        const event = transaction.events.Sent;
+  
+        if (event) {
+          const { _amount, _receiver, _sender, _uid } = event.returnValues;
+          const amount = Web3.utils.fromWei(_amount, 'ether')
+          const uid = Number(_uid)
+          return { amount, _receiver, _sender, uid };
+        } else {
+          console.log('No Sent event found in the transaction receipt');
+          return null;
+        }
       }
+    } catch {
+      return null
     }
   }
 
