@@ -14,11 +14,16 @@ export default function Home() {
   const [amount, setAmount] = useState('')
 
   const sendEth = async (address, value) => {
+    if (sendTo === '' || amount === '') {
+      toast({
+        title: 'Please fill all the fields!',
+        status: 'error',
+        duration: 10000,
+        isClosable: true,
+      })
+      return
+    }
     const tx = await send(address, value);
-    // console.log("amount:", tx.amount)
-    // console.log("receiver:", tx._receiver)
-    // console.log("sender:", tx._sender)
-    // console.log("uid:", tx.uid)
     if (tx.uid != 0) {
       toast({
         title: 'Transaction Successful!',
@@ -76,9 +81,9 @@ export default function Home() {
         Submit
       </button>
     </div></div> :
-    <h1 className="flex items-center text-red-500 font-bold px-10">
-    <FaLock className="mr-2" /> 
-    Please connect Metamask wallet first!
+    <h1 className="flex items-center text-red-500 font-bold px-1">
+    <FaLock className="mr-4 text-4xl" /> 
+    Please connect Metamask wallet and/or switch to Sepolia network first!
   </h1>}
   </div>
 </div>

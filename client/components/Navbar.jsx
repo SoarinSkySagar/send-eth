@@ -4,6 +4,7 @@ import { useWeb3 } from "@/context/Web3Context";
 import { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import { Button, ButtonGroup } from '@chakra-ui/react'
+import { useToast } from '@chakra-ui/react'
 import {
     Modal,
     ModalOverlay,
@@ -19,6 +20,8 @@ import TxDetails from "./TxDetails";
 export default function Navbar() {
     const { connectedAccount, connectMetamask, getTxDetails, getAllTxDetails } = useWeb3();
     const { isOpen, onOpen, onClose } = useDisclosure()
+    const toast = useToast()
+
 
     const [account, setAccount] = useState(null)
     const [input, setInput] = useState('')
@@ -29,6 +32,7 @@ export default function Navbar() {
         amount: '',
         uid: ''
     })
+    const [txList, setTxList] = useState([])
 
 
     useEffect(() => {
@@ -50,19 +54,45 @@ export default function Navbar() {
 
     const handleSearch = async (event) => {
         event.preventDefault(); 
+        if (input === '') {
+            toast({
+                title: 'Please enter a transaction UID!',
+                status: 'warning',
+                duration: 10000,
+                isClosable: true,
+            })
+            return
+        }
         if (input) {
             const transaction = await getTxDetails(input)
+            if (transaction.NumUid === 0) {
+                toast({
+                    title: 'Transaction not found!',
+                    status: 'error',
+                    duration: 10000,
+                    isClosable: true,
+                })
+                return
+            }
             setTx(transaction)
             setInput('')
             setModalContent('Search Results')
             onOpen()
-
         }
     }
 
     const getAllTx = async () => {
         const txs = await getAllTxDetails(account);
-        console.log(txs);
+        if (txs.length === 0) {
+            toast({
+                title: 'No transactions found!',
+                status: 'error',
+                duration: 10000,
+                isClosable: true,
+            })
+            return
+        }
+        setTxList(txs)
         setModalContent('Transaction History')
         onOpen()
     }
@@ -101,16 +131,27 @@ export default function Navbar() {
 
     <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent maxWidth="560px">
             <ModalHeader>{modalContent}</ModalHeader>
 
+            <ModalBody maxHeight="50vh" overflowY="auto"></ModalBody>
             {modalContent == 'Transaction History' 
                 ? 
-                    <ModalBody className="mx-10">
-                        <div>
-                            <p>Transaction History</p>
+                <ModalBody maxHeight="50vh" overflowY="auto">
+                    {txList.map((tx, index) => (
+                        <div key={index} className="">
+                            <TxDetails
+                                sender={tx.sender}
+                                receiver={tx.receiver}
+                                amount={tx.value}
+                                uid={tx.uid}
+                            />
+                            {index < txList.length - 1 && (
+                                <hr className="border-gray-200 my-4" />
+                            )}
                         </div>
-                    </ModalBody>
+                    ))}
+                </ModalBody>
                 : 
                     <ModalBody>
                         {tx &&

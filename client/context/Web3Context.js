@@ -35,7 +35,18 @@ export function Web3Provider({ children }) {
     if (window.ethereum && web3) {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       const accounts = await web3.eth.getAccounts();
-      setConnectedAccount(accounts[0]);
+      try {
+        await window.ethereum.request({
+          "method": "wallet_switchEthereumChain",
+          "params": [{
+              "chainId": "0xaa36a7",
+          }]})
+          setConnectedAccount(accounts[0]);
+      } catch (e) {
+        if (e.code === 4902) {
+          alert("Please switch to Sepolia chain!")
+        }
+      }
     } else {
       alert('Please install MetaMask and try again');
     }
@@ -54,7 +65,6 @@ export function Web3Provider({ children }) {
           const uid = Number(_uid)
           return { amount, _receiver, _sender, uid };
         } else {
-          console.log('No Sent event found in the transaction receipt');
           return null;
         }
       }
