@@ -12,13 +12,23 @@ import {
     ModalFooter,
     ModalBody,
     ModalCloseButton,
+    useDisclosure
 } from '@chakra-ui/react'
+import TxDetails from "./TxDetails";
 
 export default function Navbar() {
     const { connectedAccount, connectMetamask, getTxDetails, getAllTxDetails } = useWeb3();
+    const { isOpen, onOpen, onClose } = useDisclosure()
 
     const [account, setAccount] = useState(null)
     const [input, setInput] = useState('')
+    const [modalContent, setModalContent] = useState(null)
+    const [tx, setTx] = useState({
+        sender: '',
+        receiver: '',
+        amount: '',
+        uid: ''
+    })
 
 
     useEffect(() => {
@@ -41,14 +51,20 @@ export default function Navbar() {
     const handleSearch = async (event) => {
         event.preventDefault(); 
         if (input) {
-            const tx = await getTxDetails(input)
+            const transaction = await getTxDetails(input)
+            setTx(transaction)
             setInput('')
+            setModalContent('Search Results')
+            onOpen()
+
         }
     }
 
     const getAllTx = async () => {
         const txs = await getAllTxDetails(account);
         console.log(txs);
+        setModalContent('Transaction History')
+        onOpen()
     }
 
     return (
@@ -82,6 +98,34 @@ export default function Navbar() {
                 </Button>
         }
   </div>
+
+    <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+            <ModalHeader>{modalContent}</ModalHeader>
+
+            {modalContent == 'Transaction History' 
+                ? 
+                    <ModalBody className="mx-10">
+                        <div>
+                            <p>Transaction History</p>
+                        </div>
+                    </ModalBody>
+                : 
+                    <ModalBody>
+                        {tx &&
+                            <TxDetails sender={tx.sender} receiver={tx.reciever} amount={tx.valueInEth} uid={tx.NumUid} />    
+                        }
+                    </ModalBody>
+            }
+
+            <ModalFooter>
+            <Button colorScheme='blue' mr={3} onClick={onClose}>
+                Close
+            </Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
 </nav>
     
     )
